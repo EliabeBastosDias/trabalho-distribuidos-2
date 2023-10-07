@@ -1,0 +1,7 @@
+authenticator/dist
+authenticator/node_modules
+authenticator/package-lock.json
+
+client/dist
+client/node_modules
+client/package-lock.json
