@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+message Request {
+  string action = 1;
+  string token = 2;
+  string login = 3;
+  string password = 4;
+  string type = 5;
+}
+
+message Response {
+  string token = 1;
+  string info = 2;
+}
+
+message IOTRequest {
+  string type = 1;
+  string object = 2;
+  string value = 3;
+}
