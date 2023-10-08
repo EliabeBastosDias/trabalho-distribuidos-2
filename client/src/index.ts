@@ -1,3 +1,6 @@
-import { TcpServerHandler } from "./configs/tcp.server";
+import { Socket } from "./socket";
 
-new TcpServerHandler().create();
+const host = "127.0.0.6";
+const port = 3001;
+
+new Socket(host,port).create();

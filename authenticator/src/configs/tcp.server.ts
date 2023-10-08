@@ -1,13 +1,13 @@
 import * as net from "net";
+import protobufjs from "protobufjs";
 
 import { MessageRepository } from "../repositories";
 import { AuthUserCommand } from "../commands";
-import { FinishUserConnectionCommand } from "../commands/finishUserConnection.command";
 import { UserRepository } from "../repositories";
-import * as parsers from "../parsers/loggedUser.parser";
+import { GetIotData } from "../commands/getIotData.command";
 
 const PORT = 3001;
-const ADDRESS = '127.0.0.6';
+const ADDRESS = "127.0.0.6";
 
 export class TcpServerHandler {
   constructor(
@@ -15,34 +15,58 @@ export class TcpServerHandler {
     private messageRepository: MessageRepository
   ) {}
 
-  public create(): void {
-    const server = net.createServer((socket) => {
-      socket.on("auth", (data: any) => {
-        console.log(data);
-        /* const executeParams = parsers.parseAuthLoggedUser(data);
-        const command = new AuthUserCommand(this.userRepository);
-        const result = command.execute(executeParams);
-        return result; */
-      });
+  public async create(): Promise<void> {
+    const root = await protobufjs.load("chat.proto");
+    const request = root.lookupType("Request");
+    const response = root.lookupType("Response");
 
-      socket.on("user_message", (data: any) => {
-        console.log(data);
-      });
-
-      /* socket.on("receive_iot_message", (data: any) =>
-        console.log(`Dados recebidos do iot: ${data}`)
-      ); */
-
-      socket.on("end", (data: any) => {
-        const executeParams = parsers.parseFinishLoggedUser(data);
-        const command = new FinishUserConnectionCommand(this.userRepository);
-        const result = command.execute(executeParams);
-        return result;
-      });
-    });
+    const server = new net.Server();
 
     server.listen(PORT, ADDRESS, () => {
       console.log(`Servidor de autenticação TCP ouvindo em ${ADDRESS}:${PORT}`);
     });
+
+    server.on("connection", (socket) => {
+      socket.on("data", (data: any) => {
+        const message = request.decode(data);
+        const object = request.toObject(message);
+
+        console.log("Requisição => ", object);
+
+        if (object.action === "auth") {
+          const executeParams = {
+            login: object.login,
+            password: object.password,
+          };
+          const command = new AuthUserCommand(this.userRepository);
+          const token = command.execute(executeParams);
+
+          console.log("Cliente conectado");
+
+          const responseMessage = response.create({ token });
+          const encode = response.encode(responseMessage).finish();
+          socket.write(encode);
+        }
+
+        if (object.action === "client_request") {
+          console.log("entrei no client_request");
+          const executeParams = {
+            token: object.token,
+            type: object.type,
+          };
+          const command = new GetIotData(
+            this.userRepository,
+            this.messageRepository
+          );
+          const result = command.execute(executeParams);
+
+          const encode = response.encode({ info: result }).finish();
+          socket.write(encode);
+        }
+      });
+    });
   }
 }
+
+/* "auth:login:password" => "auth:token"
+"request:token:type" => "request:data" */

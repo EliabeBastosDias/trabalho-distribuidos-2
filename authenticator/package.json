@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "tsc --p tsconfig.json",
-    "dev": "node dist/index.js"
+    "dev": "tsc --p tsconfig.json && node dist/index.js"
   },
   "license": "ISC",
   "devDependencies": {
@@ -13,6 +12,7 @@
   },
   "dependencies": {
     "dotenv": "^16.3.1",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "protobufjs": "^7.2.5"
   }
 }
