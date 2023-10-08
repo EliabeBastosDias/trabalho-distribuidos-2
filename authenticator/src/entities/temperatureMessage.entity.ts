@@ -1,5 +1,5 @@
 export type TemperatureMessageEntity =  {
   token: string;
-  number: number;
+  data: string;
   created_at: string;
 }

@@ -67,6 +67,3 @@ export class TcpServerHandler {
     });
   }
 }
-
-/* "auth:login:password" => "auth:token"
-"request:token:type" => "request:data" */

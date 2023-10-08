@@ -19,7 +19,7 @@ const users: UserEntity[] = [
 const iotUsers: UserEntity[] = [];
 
 const temperatures: TemperatureMessageEntity[] = [
-  { token: "1", number: 34, created_at: new Date().toLocaleDateString() },
+  { token: "1", data: "34", created_at: new Date().toLocaleDateString() },
 ];
 const lights: LightMessageEntity[] = [];
 const airs: ConditionalMessageEntity[] = [];
