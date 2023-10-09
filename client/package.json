@@ -10,11 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "prompt-sync": "^4.2.0",
     "protobufjs": "^7.2.5",
     "readline-sync": "^1.4.10"
   },
   "devDependencies": {
     "@types/node": "^20.8.3",
+    "@types/prompt-sync": "^4.2.1",
+    "@types/readline-sync": "^1.4.5",
     "typescript": "^5.2.2"
   }
 }

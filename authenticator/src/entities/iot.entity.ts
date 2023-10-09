@@ -1,5 +1,6 @@
 export type IotUserEntity = {
-  ip: string;
+  address: string;
+  port: number;
   type: IotType;
 };
 

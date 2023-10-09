@@ -6,8 +6,7 @@ export class SetIotData {
 
   public execute(params: ISetIotParams): void {
     this.messageRepository.setIotData(
-      params.data,
-      params.created_at,
+      params.object,
       params.type
     );
   }

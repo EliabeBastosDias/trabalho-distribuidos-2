@@ -1,5 +1,5 @@
 export interface ISetIotParams {
-  data: string;
-  created_at: string;
   type: string;
+  object: string;
+  value: string;
 }

@@ -1,5 +1,5 @@
 import {
-  ConditionalMessageEntity,
+  AirMessageEntity,
   LightMessageEntity,
   TemperatureMessageEntity,
 } from "../entities";
@@ -10,7 +10,7 @@ export class MessageRepository {
   public static getInstance(
     temperatures: TemperatureMessageEntity[],
     lights: LightMessageEntity[],
-    airs: ConditionalMessageEntity[]
+    airs: AirMessageEntity[]
   ): MessageRepository {
     if (!MessageRepository.instance) {
       const instance = new MessageRepository(temperatures, lights, airs);
@@ -22,27 +22,43 @@ export class MessageRepository {
   private constructor(
     private temperatures: TemperatureMessageEntity[],
     private lights: LightMessageEntity[],
-    private airs: ConditionalMessageEntity[]
+    private airs: AirMessageEntity[]
   ) {}
 
   public getIotData(type: string): string {
     if (type === "TEMPERATURE") {
-      return this.temperatures.map((t) => t.data).toString();
+      const arr: string[] = [];
+      this.temperatures.forEach((t) => {
+        arr.push(`==> ${new Date(t.created_at).toUTCString()} => ${t.data}\n`);
+      })
+      return arr.join('');
     } else if (type === "LIGHT") {
-      return this.lights.toString();
+      return this.lights.join(" , ");
     } else if (type === "AIR") {
-      return this.airs.toString();
+      return this.airs.join(" , ");
     }
     return "";
   }
 
-  public setIotData(data: string, created_at: string, type: string): void {
+  public setIotData(data: string, type: string): void {
     if (type === "TEMPERATURE") {
-      this.temperatures.push({ token: "1", data, created_at });
+      if (this.temperatures.length > 30) this.temperatures.shift();
+      this.temperatures.push({
+        data,
+        created_at: new Date().getMilliseconds(),
+      });
     } else if (type === "LIGHT") {
-      return;
+      if (this.lights.length > 30) this.lights.shift();
+      this.lights.push({
+        data: data === "S",
+        created_at: new Date().getMilliseconds(),
+      });
     } else if (type === "AIR") {
-      return;
+      if (this.airs.length > 30) this.airs.shift();
+      this.airs.push({
+        data: parseFloat(data),
+        created_at: new Date().getMilliseconds(),
+      });
     }
   }
 }

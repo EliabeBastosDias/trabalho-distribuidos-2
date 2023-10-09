@@ -1,5 +1,4 @@
 export type LightMessageEntity = {
-  token: string;
-  boolean: boolean;
-  created_at: string;
+  data: boolean;
+  created_at: number;
 }

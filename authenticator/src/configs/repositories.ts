@@ -1,11 +1,13 @@
 import {
   TemperatureMessageEntity,
   LightMessageEntity,
-  ConditionalMessageEntity,
+  AirMessageEntity,
   UserEntity,
   LoggedUserEntity,
+  IotUserEntity,
 } from "../entities";
 import { MessageRepository, UserRepository } from "../repositories";
+import { IotRepository } from "../repositories/iotRepository";
 
 const STACK_LENGTH = 100;
 
@@ -16,13 +18,11 @@ const users: UserEntity[] = [
   { token: "3", login: "weatherly", password: "345" },
   { token: "4", login: "moises", password: "456" },
 ];
-const iotUsers: UserEntity[] = [];
+const iotUsers: IotUserEntity[] = [];
 
-const temperatures: TemperatureMessageEntity[] = [
-  { token: "1", data: "34", created_at: new Date().toLocaleDateString() },
-];
+const temperatures: TemperatureMessageEntity[] = [];
 const lights: LightMessageEntity[] = [];
-const airs: ConditionalMessageEntity[] = [];
+const airs: AirMessageEntity[] = [];
 
 export const userRepository = UserRepository.getInstance(users, loggedUsers);
 export const messageRepository = MessageRepository.getInstance(
@@ -30,3 +30,4 @@ export const messageRepository = MessageRepository.getInstance(
   lights,
   airs
 );
+export const iotRepository = IotRepository.getInstance(iotUsers);

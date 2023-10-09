@@ -31,8 +31,6 @@ export class TcpServerHandler {
         const message = request.decode(data);
         const object = request.toObject(message);
 
-        console.log("Requisição => ", object);
-
         if (object.action === "auth") {
           const executeParams = {
             login: object.login,
@@ -49,7 +47,6 @@ export class TcpServerHandler {
         }
 
         if (object.action === "client_request") {
-          console.log("entrei no client_request");
           const executeParams = {
             token: object.token,
             type: object.type,

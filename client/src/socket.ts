@@ -1,51 +1,64 @@
 import net from "net";
-import readline from "readline";
-import protobufjs, { Root } from "protobufjs";
+import readlineSync from "readline-sync";
+import protobufjs from "protobufjs";
 
 export class Socket {
   constructor(private address: string, private port: number) {}
 
   public async create() {
-    let authToken: string;
+    const auth = { token: "", isLogged: false };
+    let wait = false;
 
     const root = await protobufjs.load("chat.proto");
     const request = root.lookupType("Request");
     const response = root.lookupType("Response");
 
-    const client = new net.Socket();
-
-    client.connect({ port: this.port, host: this.address }, () => {
+    const client = net.createConnection(this.port, this.address, () => {
       console.log("TCP connection established with the server.");
+
+      const login = readlineSync.question("Login: ");
+      const password = readlineSync.question("Password: ");
+
       const message = request.create({
         action: "auth",
-        login: "eliabe",
-        password: "123",
+        login,
+        password,
       });
+
       const encode = request.encode(message).finish();
       client.write(encode);
-    });
 
-    client.on("data", (data) => {
-      const message = response.decode(data);
-      const object = response.toObject(message);
+      client.on("data", (data) => {
+        const message = response.decode(data);
+        const object = response.toObject(message);
 
-      console.log(object);
+        const { token, info } = object;
 
-      const { token, info } = object;
-
-      if (token) authToken = token;
-      if (info) console.log(info);
-    });
-
-    setInterval(() => {
-      const message = request.create({
-        action: "client_request",
-        token: authToken,
-        type: "TEMPERATURE",
+        if (token) {
+          auth.token = token;
+          auth.isLogged = true;
+        }
+        if (info) console.log(info);
+        wait = true;
       });
-      const encode = request.encode(message).finish();
-      client.write(encode);
-      console.log("mandei");
-    }, 5000);
+
+      setInterval(() => {
+        if (wait) {
+          const type = readlineSync.question(
+            "Escolha o tipo de dispositivo (TEMPERATURE, LIGHT, AIR) ou 'sair' para sair: "
+          );
+
+          const message = request.create({
+            action: "client_request",
+            token: auth.token,
+            type,
+          });
+
+          const encode = request.encode(message).finish();
+          client.write(encode);
+          wait = false;
+        }
+      }, 3000);
+    });
   }
 }
