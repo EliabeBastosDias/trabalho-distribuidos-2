@@ -4,6 +4,7 @@ import protobufjs from "protobufjs";
 
 import { MessageRepository } from "../repositories";
 import { IotRepository } from "../repositories/iotRepository";
+import { EventHandler } from "../events";
 
 const PORT = 60000;
 const ADDRESS = "127.0.0.6";
@@ -11,7 +12,8 @@ const ADDRESS = "127.0.0.6";
 export class UdpServerHandler {
   constructor(
     private iotRepository: IotRepository,
-    private messageRepository: MessageRepository
+    private messageRepository: MessageRepository,
+    private eventHandler: EventHandler
   ) {}
 
   public async create(): Promise<void> {
@@ -28,7 +30,7 @@ export class UdpServerHandler {
         iotObject.port,
         iotObject.type
       );
-      
+
       switch (iotObject.type) {
         case "connection":
           const address = server.address();
@@ -48,9 +50,12 @@ export class UdpServerHandler {
           const object = iotRequest.toObject(iotObject);
 
           this.messageRepository.setIotData(object.value, object.object);
-
           break;
       }
+
+      setInterval(() => {
+        
+      }, 2000)
     });
 
     server.on("listening", () => {

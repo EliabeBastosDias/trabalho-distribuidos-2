@@ -6,6 +6,7 @@ message Request {
   string login = 3;
   string password = 4;
   string type = 5;
+  string state = 6;
 }
 
 message Response {

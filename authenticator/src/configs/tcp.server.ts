@@ -5,6 +5,7 @@ import { MessageRepository } from "../repositories";
 import { AuthUserCommand } from "../commands";
 import { UserRepository } from "../repositories";
 import { GetIotData } from "../commands/getIotData.command";
+import { EventHandler } from "../events";
 
 const PORT = 3001;
 const ADDRESS = "127.0.0.6";
@@ -12,7 +13,8 @@ const ADDRESS = "127.0.0.6";
 export class TcpServerHandler {
   constructor(
     private userRepository: UserRepository,
-    private messageRepository: MessageRepository
+    private messageRepository: MessageRepository,
+    private eventHandler: EventHandler
   ) {}
 
   public async create(): Promise<void> {
@@ -59,6 +61,17 @@ export class TcpServerHandler {
 
           const encode = response.encode({ info: result }).finish();
           socket.write(encode);
+        }
+
+        if (object.action === "set_iot_state") {
+          const user = this.userRepository.getLoggedUserByToken(object.token);
+          if (!user) {
+            const encode = response
+              .encode({ info: "Client not connected" })
+              .finish();
+            socket.write(encode);
+          }
+          this.eventHandler.storeEvent({ type: object.type, state: object.state });
         }
       });
     });

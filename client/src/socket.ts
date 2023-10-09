@@ -44,18 +44,38 @@ export class Socket {
 
       setInterval(() => {
         if (wait) {
-          const type = readlineSync.question(
-            "Escolha o tipo de dispositivo (TEMPERATURE, LIGHT, AIR) ou 'sair' para sair: "
-          );
+          console.log("Devices => TEMPERATURE, LIGHT, AIR");
+          const type = readlineSync.question("Escolha o dispositivo: ");
+          if (["TEMPERATURE, LIGHT, AIR"].includes(type))
+            console.log("Opção inválida");
 
-          const message = request.create({
-            action: "client_request",
-            token: auth.token,
-            type,
-          });
+          console.log("\nDigite 1 para obter dados");
+          console.log("Digite 2 para setar dado em iot");
+          const action = readlineSync.question("O que você quer fazer: ");
+          
+          if (action === "1") {
+            const message = request.create({
+              action: "client_request",
+              token: auth.token,
+              type,
+            });
+            const encode = request.encode(message).finish();
+            client.write(encode);
+          }
+          if (action === "2") {
+            const state = readlineSync.question("Resultado a ser setado no iot: ");
+            const message = request.create({
+              action: "set_iot_state",
+              token: auth.token,
+              type,
+              state
+            });
+            const encode = request.encode(message).finish();
+            client.write(encode);
+          } else {
+            console.log("Opção inválida");
+          }
 
-          const encode = request.encode(message).finish();
-          client.write(encode);
           wait = false;
         }
       }, 3000);
