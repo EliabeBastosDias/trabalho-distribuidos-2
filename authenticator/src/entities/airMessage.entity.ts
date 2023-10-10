@@ -1,4 +1,4 @@
 export type AirMessageEntity = {
-  data: number;
+  data: boolean;
   created_at: number;
 }

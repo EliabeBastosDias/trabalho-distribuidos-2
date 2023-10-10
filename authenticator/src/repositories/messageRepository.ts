@@ -43,7 +43,15 @@ export class MessageRepository {
       );
       return arr.join("");
     } else if (type === "AIR") {
-      return this.airs.join(" , ");
+      const arr: string[] = [];
+      this.airs.forEach((t) =>
+        arr.push(
+          `==> ${new Date(t.created_at).toUTCString()} => ${
+            t.data ? "LIGADO" : "DESLIGADO"
+          }\n`
+        )
+      );
+      return arr.join("");
     }
     return "";
   }
@@ -64,7 +72,7 @@ export class MessageRepository {
     } else if (type === "AIR") {
       if (this.airs.length > 30) this.airs.shift();
       this.airs.push({
-        data: parseFloat(data),
+        data: data === "ON",
         created_at: new Date().getTime(),
       });
     }

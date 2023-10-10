@@ -60,7 +60,10 @@ while True:
     # Verifica se a mensagem é um comando para ligar a lâmpada
     message = ""
     if received_message.type == "command":
-        lamp_status = received_message.value
+        if (received_message.value == "ON"):
+            lamp_status = "ON"
+        if (received_message.value == "OFF"):
+            lamp_status = "OFF"
         message = createMessage(
             type="update_value", object="LIGHT", value=lamp_status
         )
@@ -68,7 +71,6 @@ while True:
         message = createMessage(
             type="update_value", object="LIGHT", value=lamp_status
         )
-    print(lamp_status)
     # Envia o estado atual da lâmpada para o Gateway
     
     broadcastSocket.sendto(message, (ipCommunication, portCommunication))

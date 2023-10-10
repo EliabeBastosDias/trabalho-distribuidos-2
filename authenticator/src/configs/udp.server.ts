@@ -26,6 +26,7 @@ export class UdpServerHandler {
         const event = this.eventHandler.getFirstEvent();
         if (event && event.socket === "UDP") {
           const iot = this.iotRepository.getIotUser(event.type);
+          console.log(iot);
           if (!iot) {
             console.log("Iot not found");
             return;
@@ -33,7 +34,7 @@ export class UdpServerHandler {
           const setMessage = iotRequest.create({
             type: "command",
             value: event.state,
-            object: "LIGHT",
+            object: event.type,
           });
           const buffer = iotRequest.encode(setMessage).finish();
           server.send(buffer, rinfo.port, rinfo.address, (err) => {
