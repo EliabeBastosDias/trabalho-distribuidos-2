@@ -1,4 +1,4 @@
-# Documentação
+# Documentação do Client
 
 ## Dependências do client
 O cliente usa as seguintes bibliotecas:
@@ -35,6 +35,8 @@ Este arquivo define as mensagens Protocol Buffers usadas na comunicação entre 
     - `token`: uma string que representa um token de autenticação (se aplicável).
     - `info`: uma string que representa as informações ou mensagens enviadas pelo servidor.
 
+
+# Documentação dos Sensores
 
 ## Dependências do sensores (TEMPERATURE, LIGHT, AIR)
 O dispositivo usa as seguintes bibliotecas:
