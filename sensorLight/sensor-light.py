@@ -23,7 +23,7 @@ def getObjectFromData(data):
 
 
 port = 60000
-broadcastAddr = ("127.0.0.6", port)
+broadcastAddr = ("255.255.255.255", port)
 bufferSize = 1024
 
 # SOCKET UDP - Broadcast
@@ -56,7 +56,6 @@ while True:
     # Recebe mensagens do Gateway
     data, _ = broadcastSocket.recvfrom(bufferSize)
     received_message = getObjectFromData(data)
-    
     # Verifica se a mensagem é um comando para ligar a lâmpada
     message = ""
     if received_message.type == "command":

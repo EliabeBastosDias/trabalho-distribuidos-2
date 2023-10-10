@@ -26,7 +26,7 @@ export class UdpServerHandler {
         const event = this.eventHandler.getFirstEvent();
         if (event && event.socket === "UDP") {
           const iot = this.iotRepository.getIotUser(event.type);
-          console.log(iot);
+          
           if (!iot) {
             console.log("Iot not found");
             return;
@@ -37,7 +37,7 @@ export class UdpServerHandler {
             object: event.type,
           });
           const buffer = iotRequest.encode(setMessage).finish();
-          server.send(buffer, rinfo.port, rinfo.address, (err) => {
+          server.send(buffer, iot.port, iot.address, (err) => {
             if (err) console.error(`Erro: ${err}`);
           });
         }
@@ -48,8 +48,11 @@ export class UdpServerHandler {
 
       switch (iotObject.type) {
         case "connection":
+          // Save new iot object
           const [address, port] = iotObject.value.split(":");
           this.iotRepository.saveIotUser(address, port, iotObject.object);
+
+          // Send addres to iot object
           const udpaddress = server.address();
           const connMessage = iotRequest.create({
             type: "connection",
@@ -62,6 +65,7 @@ export class UdpServerHandler {
             if (err) console.error(`Erro: ${err}`);
           });
 
+          // Request the initial state of object
           const message = iotRequest.create({ type: "request" });
 
           const requestBuffer = iotRequest.encode(message).finish();
@@ -69,26 +73,21 @@ export class UdpServerHandler {
             if (err) console.error(`Erro: ${err}`);
           });
 
+          console.log(" --------- Objetos conectados --------- ")
+          console.log(this.iotRepository);
+
           break;
         case "update_value":
-          const updateIotObject = iotRequest.decode(data);
-          const updateObject = iotRequest.toObject(updateIotObject);
-
-          console.log(updateObject);
-
           this.messageRepository.setIotData(
-            updateObject.value,
-            updateObject.object
+            iotObject.value,
+            iotObject.object
           );
           break;
         case "request":
-          const requestIotObject = iotRequest.decode(data);
-          const requestObject = iotRequest.toObject(requestIotObject);
-
           this.eventHandler.storeEvent({
             socket: "TCP",
-            type: requestObject.type,
-            state: requestObject.value,
+            type: iotObject.type,
+            state: iotObject.value,
           });
           break;
       }

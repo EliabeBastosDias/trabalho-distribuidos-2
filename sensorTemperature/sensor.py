@@ -23,7 +23,7 @@ def getObjectFromData(data):
 
 
 port = 60000
-broadcastAddr = ("127.0.0.6", port)
+broadcastAddr = ("255.255.255.255", port)
 bufferSize = 1024
 
 # SOCKET UDP - Broadcast

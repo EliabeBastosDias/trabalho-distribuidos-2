@@ -66,6 +66,7 @@ export class TcpServerHandler {
         }
 
         if (object.action === "set_iot_state") {
+          console.log(object);
           const user = this.userRepository.getLoggedUserByToken(object.token);
           if (!user) {
             const encode = response
@@ -78,6 +79,7 @@ export class TcpServerHandler {
             type: object.type,
             state: object.state,
           });
+          console.log(this.eventHandler)
           const responseMessage = response.create({ token: object.token });
           const encode = response.encode(responseMessage).finish();
           socket.write(encode);
