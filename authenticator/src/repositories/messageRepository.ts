@@ -30,10 +30,18 @@ export class MessageRepository {
       const arr: string[] = [];
       this.temperatures.forEach((t) => {
         arr.push(`==> ${new Date(t.created_at).toUTCString()} => ${t.data}\n`);
-      })
-      return arr.join('');
+      });
+      return arr.join("");
     } else if (type === "LIGHT") {
-      return this.lights.join(" , ");
+      const arr: string[] = [];
+      this.lights.forEach((t) =>
+        arr.push(
+          `==> ${new Date(t.created_at).toUTCString()} => ${
+            t.data ? "LIGADO" : "DESLIGADO"
+          }\n`
+        )
+      );
+      return arr.join("");
     } else if (type === "AIR") {
       return this.airs.join(" , ");
     }
@@ -45,19 +53,19 @@ export class MessageRepository {
       if (this.temperatures.length > 30) this.temperatures.shift();
       this.temperatures.push({
         data,
-        created_at: new Date().getMilliseconds(),
+        created_at: new Date().getTime(),
       });
     } else if (type === "LIGHT") {
       if (this.lights.length > 30) this.lights.shift();
       this.lights.push({
-        data: data === "S",
-        created_at: new Date().getMilliseconds(),
+        data: data === "ON",
+        created_at: new Date().getTime(),
       });
     } else if (type === "AIR") {
       if (this.airs.length > 30) this.airs.shift();
       this.airs.push({
         data: parseFloat(data),
-        created_at: new Date().getMilliseconds(),
+        created_at: new Date().getTime(),
       });
     }
   }

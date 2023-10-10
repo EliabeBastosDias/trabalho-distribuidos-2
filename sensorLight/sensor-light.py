@@ -23,7 +23,7 @@ def getObjectFromData(data):
 
 
 port = 60000
-broadcastAddr = ("255.255.255.255", port)
+broadcastAddr = ("127.0.0.6", port)
 bufferSize = 1024
 
 # SOCKET UDP - Broadcast
@@ -53,20 +53,22 @@ print(f"{ipCommunication} {portCommunication}")
 
 lamp_status = "OFF"
 while True:
-    
     # Recebe mensagens do Gateway
     data, _ = broadcastSocket.recvfrom(bufferSize)
     received_message = getObjectFromData(data)
     
     # Verifica se a mensagem é um comando para ligar a lâmpada
-    if received_message.type == "command" and received_message.object == "LIGHT":
-        if received_message.value == "ON":
-            lamp_status = "ON"
-        elif received_message.value == "OFF":
-            lamp_status = "OFF"
-    
+    message = ""
+    if received_message.type == "command":
+        lamp_status = received_message.value
+        message = createMessage(
+            type="update_value", object="LIGHT", value=lamp_status
+        )
+    elif received_message.type == "request":
+        message = createMessage(
+            type="update_value", object="LIGHT", value=lamp_status
+        )
+    print(lamp_status)
     # Envia o estado atual da lâmpada para o Gateway
-    message = createMessage(
-        type="update_value", object="LIGHT", value=lamp_status
-    )
+    
     broadcastSocket.sendto(message, (ipCommunication, portCommunication))

@@ -1,6 +1,5 @@
-import { IotType } from "../entities/iot.entity";
-
 export type EventEntity = {
-  type: IotType;
+  socket: string;
+  type: string;
   state: string;
 };

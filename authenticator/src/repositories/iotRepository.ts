@@ -1,5 +1,4 @@
 import { IotUserEntity } from "../entities";
-import { IotType } from "../entities/iot.entity";
 
 export class IotRepository {
   private static instance: IotRepository;
@@ -14,9 +13,13 @@ export class IotRepository {
 
   private constructor(private iotUsers: IotUserEntity[]) {}
 
-  public saveIotUser(address: string, port: number, type: IotType): void {
-    if (this.iotUsers.find((user) => user.address === address)) {
+  public saveIotUser(address: string, port: number, type: string): void {
+    if (!this.iotUsers.map((i) => i.port).includes(port)) {
       this.iotUsers.push({ address, port, type });
     }
+  }
+
+  public getIotUser(type: string): IotUserEntity | undefined {
+    return this.iotUsers.find((i) => i.type === type);
   }
 }

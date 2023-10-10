@@ -22,45 +22,80 @@ export class UdpServerHandler {
 
     const server = dgram.createSocket("udp4");
     server.on("message", (data, rinfo) => {
-      const message = iotRequest.decode(data);
-      const iotObject = iotRequest.toObject(message);
-
-      this.iotRepository.saveIotUser(
-        iotObject.address,
-        iotObject.port,
-        iotObject.type
-      );
-
-      switch (iotObject.type) {
-        case "connection":
-          const address = server.address();
-          let message = iotRequest.create({
-            type: "connection",
-            object: "",
-            value: `${address.address}:${address.port}`,
+      setInterval(() => {
+        const event = this.eventHandler.getFirstEvent();
+        if (event && event.socket === "UDP") {
+          const iot = this.iotRepository.getIotUser(event.type);
+          if (!iot) {
+            console.log("Iot not found");
+            return;
+          }
+          const setMessage = iotRequest.create({
+            type: "command",
+            value: event.state,
+            object: "LIGHT",
           });
-
-          const buffer = iotRequest.encode(message).finish();
+          const buffer = iotRequest.encode(setMessage).finish();
           server.send(buffer, rinfo.port, rinfo.address, (err) => {
             if (err) console.error(`Erro: ${err}`);
           });
+        }
+      }, 2000);
+
+      const message = iotRequest.decode(data);
+      const iotObject = iotRequest.toObject(message);
+
+      switch (iotObject.type) {
+        case "connection":
+          const [address, port] = iotObject.value.split(":");
+          this.iotRepository.saveIotUser(address, port, iotObject.object);
+          const udpaddress = server.address();
+          const connMessage = iotRequest.create({
+            type: "connection",
+            object: "",
+            value: `${udpaddress.address}:${udpaddress.port}`,
+          });
+
+          const connBuffer = iotRequest.encode(connMessage).finish();
+          server.send(connBuffer, rinfo.port, rinfo.address, (err) => {
+            if (err) console.error(`Erro: ${err}`);
+          });
+
+          const message = iotRequest.create({ type: "request" });
+
+          const requestBuffer = iotRequest.encode(message).finish();
+          server.send(requestBuffer, rinfo.port, rinfo.address, (err) => {
+            if (err) console.error(`Erro: ${err}`);
+          });
+
           break;
         case "update_value":
-          const iotObject = iotRequest.decode(data);
-          const object = iotRequest.toObject(iotObject);
+          const updateIotObject = iotRequest.decode(data);
+          const updateObject = iotRequest.toObject(updateIotObject);
 
-          this.messageRepository.setIotData(object.value, object.object);
+          console.log(updateObject);
+
+          this.messageRepository.setIotData(
+            updateObject.value,
+            updateObject.object
+          );
+          break;
+        case "request":
+          const requestIotObject = iotRequest.decode(data);
+          const requestObject = iotRequest.toObject(requestIotObject);
+
+          this.eventHandler.storeEvent({
+            socket: "TCP",
+            type: requestObject.type,
+            state: requestObject.value,
+          });
           break;
       }
-
-      setInterval(() => {
-        
-      }, 2000)
     });
 
     server.on("listening", () => {
       const address = server.address();
-      console.log(`server listening ${address.address}:${address.port}`);
+      console.log(`Server listening ${address.address}:${address.port}`);
     });
 
     server.bind(PORT, ADDRESS);

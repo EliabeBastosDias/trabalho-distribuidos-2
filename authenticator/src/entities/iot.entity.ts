@@ -1,11 +1,5 @@
 export type IotUserEntity = {
   address: string;
   port: number;
-  type: IotType;
+  type: string;
 };
-
-export enum IotType {
-  LIGHT = "LIGHT",
-  TEMPERATURE = "TEMPERATURE",
-  AIR_CONDITIONING = "AIR CONDITIONING",
-}

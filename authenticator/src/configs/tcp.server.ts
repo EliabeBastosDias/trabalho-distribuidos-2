@@ -18,6 +18,7 @@ export class TcpServerHandler {
   ) {}
 
   public async create(): Promise<void> {
+    let wait = false;
     const root = await protobufjs.load("chat.proto");
     const request = root.lookupType("Request");
     const response = root.lookupType("Response");
@@ -61,6 +62,7 @@ export class TcpServerHandler {
 
           const encode = response.encode({ info: result }).finish();
           socket.write(encode);
+          wait = true;
         }
 
         if (object.action === "set_iot_state") {
@@ -71,8 +73,27 @@ export class TcpServerHandler {
               .finish();
             socket.write(encode);
           }
-          this.eventHandler.storeEvent({ type: object.type, state: object.state });
+          this.eventHandler.storeEvent({
+            socket: "UDP",
+            type: object.type,
+            state: object.state,
+          });
+          const responseMessage = response.create({ token: object.token });
+          const encode = response.encode(responseMessage).finish();
+          socket.write(encode);
         }
+
+        setInterval(() => {
+          if (wait) {
+            const event = this.eventHandler.getFirstEvent();
+            if (event && event.socket === "TCP") {
+              const responseMessage = response.create({ info: event.state });
+              const encode = response.encode(responseMessage).finish();
+              socket.write(encode);
+            }
+          }
+          wait = false;
+        }, 2000);
       });
     });
   }
